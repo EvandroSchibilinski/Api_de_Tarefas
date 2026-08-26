@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tarefas</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f3;
+      --surface: #ffffff;
+      --border: #e2e2de;
+      --text: #1a1a18;
+      --text-muted: #888780;
+      --accent: #2563eb;
+      --accent-bg: #eff6ff;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header i { font-size: 20px; color: var(--accent); }
+    header h1 { font-size: 17px; font-weight: 500; }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-card h2 {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .form-row { display: flex; flex-direction: column; gap: .75rem; }
+
+    input[type="text"], input[type="date"], textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 72px; }
+
+    .form-actions { display: flex; gap: .5rem; margin-top: .75rem; }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: background .12s, border-color .12s;
+    }
+
+    button:hover { background: var(--bg); }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    button.primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+    button i { font-size: 15px; }
+
+    .filters {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .filter-btn {
+      padding: 5px 12px;
+      font-size: 13px;
+      border-radius: 999px;
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .lista { display: flex; flex-direction: column; gap: .5rem; }
+
+    .tarefa-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      transition: border-color .15s;
+    }
+
+    .tarefa-card:hover { border-color: #c8c8c4; }
+    .tarefa-card.concluida { opacity: .55; }
+
+    .check-btn {
+      margin-top: 2px;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      border-radius: 50%;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid var(--border);
+      background: transparent;
+    }
+
+    .check-btn.done {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .check-btn i { font-size: 13px; }
+
+    .tarefa-body { flex: 1; min-width: 0; }
+
+    .tarefa-titulo {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .tarefa-titulo.riscado { text-decoration: line-through; color: var(--text-muted); }
+
+    .tarefa-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      white-space: pre-wrap;
+    }
+
+    .tarefa-meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    .badge.PENDENTE { background: var(--warning-bg); color: var(--warning); }
+    .badge.EM_ANDAMENTO { background: var(--accent-bg); color: var(--accent); }
+    .badge.CONCLUIDA { background: var(--success-bg); color: var(--success); }
+
+    .data-badge {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .data-badge.atrasada { color: var(--danger); }
+
+    .tarefa-actions { display: flex; gap: .25rem; margin-left: auto; }
+
+    .icon-btn {
+      width: 30px; height: 30px;
+      padding: 0;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+    }
+
+    .icon-btn:hover { background: var(--bg); border-color: var(--border); color: var(--text); }
+    .icon-btn.danger:hover { color: var(--danger); border-color: #fecaca; background: var(--danger-bg); }
+    .icon-btn i { font-size: 15px; }
+
+    .vazio {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    .vazio i { font-size: 36px; display: block; margin-bottom: .5rem; }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--text);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .2s, transform .2s;
+      pointer-events: none;
+      z-index: 99;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.35);
+      z-index: 20;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      width: min(480px, 90vw);
+      border: 1px solid var(--border);
+    }
+
+    .modal h2 { font-size: 16px; margin-bottom: 1rem; }
+    .modal .form-row { margin-bottom: 1rem; }
+
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
+
+    select:focus { border-color: var(--accent); }
+
+    label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <i class="ti ti-check" aria-hidden="true"></i>
+  <h1>Minhas tarefas</h1>
+</header>
+
+<main>
+  <div class="form-card">
+    <h2>Nova tarefa</h2>
+    <div class="form-row">
+      <input type="text" id="inp-titulo" placeholder="Título da tarefa" />
+      <textarea id="inp-desc" placeholder="Descrição (opcional)"></textarea>
+      <input type="date" id="inp-data" />
+      <div class="form-actions">
+        <button class="primary" onclick="criarTarefa()">
+          <i class="ti ti-plus" aria-hidden="true"></i> Criar tarefa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" onclick="filtrar(this, 'TODAS')">Todas</button>
+    <button class="filter-btn" onclick="filtrar(this, 'PENDENTE')">Pendente</button>
+    <button class="filter-btn" onclick="filtrar(this, 'EM_ANDAMENTO')">Em andamento</button>
+    <button class="filter-btn" onclick="filtrar(this, 'CONCLUIDA')">Concluída</button>
+    <button class="filter-btn" onclick="filtrar(this, 'ATRASADAS')" style="color:var(--danger);border-color:#fecaca;">Atrasadas</button>
+  </div>
+
+  <div class="lista" id="lista"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>Editar tarefa</h2>
+    <div class="form-row">
+      <div>
+        <label>Título</label>
+        <input type="text" id="edit-titulo" />
+      </div>
+      <div>
+        <label>Descrição</label>
+        <textarea id="edit-desc"></textarea>
+      </div>
+      <div>
+        <label>Data limite</label>
+        <input type="date" id="edit-data" />
+      </div>
+      <div>
+        <label>Status</label>
+        <select id="edit-status">
+          <option value="PENDENTE">Pendente</option>
+          <option value="EM_ANDAMENTO">Em andamento</option>
+          <option value="CONCLUIDA">Concluída</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="primary" onclick="salvarEdicao()"><i class="ti ti-check" aria-hidden="true"></i> Salvar</button>
+      <button onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '/tarefas';
+  let tarefas = [];
+  let filtroAtual = 'TODAS';
+  let editandoId = null;
+
+  async function carregar() {
+    try {
+      const res = await fetch(API);
+      tarefas = await res.json();
+      renderizar();
+    } catch { toast('Erro ao conectar com a API', true); }
+  }
+
+  async function criarTarefa() {
+    const titulo = document.getElementById('inp-titulo').value.trim();
+    const descricao = document.getElementById('inp-desc').value.trim();
+    const dataLimite = document.getElementById('inp-data').value;
+    if (!titulo) { toast('Informe um título'); return; }
+
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo, descricao, dataLimite: dataLimite || null })
+    });
+
+    if (res.ok) {
+      document.getElementById('inp-titulo').value = '';
+      document.getElementById('inp-desc').value = '';
+      document.getElementById('inp-data').value = '';
+      toast('Tarefa criada');
+      carregar();
+    } else {
+      const err = await res.json();
+      toast(err.mensagem || 'Erro ao criar', true);
+    }
+  }
+
+  async function alternarStatus(tarefa) {
+    const proximo = tarefa.status === 'PENDENTE' ? 'EM_ANDAMENTO'
+                  : tarefa.status === 'EM_ANDAMENTO' ? 'CONCLUIDA'
+                  : 'PENDENTE';
+    await fetch(`${API}/${tarefa.id}/status?status=${proximo}`, { method: 'PATCH' });
+    carregar();
+  }
+
+  async function excluir(id) {
+    if (!confirm('Excluir esta tarefa?')) return;
+    await fetch(`${API}/${id}`, { method: 'DELETE' });
+    toast('Tarefa excluída');
+    carregar();
+  }
+
+  function abrirEdicao(tarefa) {
+    editandoId = tarefa.id;
+    document.getElementById('edit-titulo').value = tarefa.titulo || '';
+    document.getElementById('edit-desc').value = tarefa.descricao || '';
+    document.getElementById('edit-data').value = tarefa.dataLimite || '';
+    document.getElementById('edit-status').value = tarefa.status;
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function fecharModal() {
+    document.getElementById('modal').classList.remove('open');
+    editandoId = null;
+  }
+
+  async function salvarEdicao() {
+    const titulo = document.getElementById('edit-titulo').value.trim();
+    const descricao = document.getElementById('edit-desc').value.trim();
+    const dataLimite = document.getElementById('edit-data').value;
+    const status = document.getElementById('edit-status').value;
+    if (!titulo) { toast('Informe um título'); return; }
+
+    await fetch(`${API}/${editandoId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titulo, descricao, dataLimite: dataLimite || null })
+    });
+
+    if (status !== tarefas.find(t => t.id === editandoId)?.status) {
+      await fetch(`${API}/${editandoId}/status?status=${status}`, { method: 'PATCH' });
+    }
+
+    fecharModal();
+    toast('Tarefa atualizada');
+    carregar();
+  }
+
+  function filtrar(btn, valor) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtroAtual = valor;
+    renderizar();
+  }
+
+  function renderizar() {
+    const hoje = new Date().toISOString().split('T')[0];
+    let lista = [...tarefas];
+
+    if (filtroAtual === 'ATRASADAS') {
+      lista = lista.filter(t => t.dataLimite && t.dataLimite < hoje && t.status !== 'CONCLUIDA');
+    } else if (filtroAtual !== 'TODAS') {
+      lista = lista.filter(t => t.status === filtroAtual);
+    }
+
+    const el = document.getElementById('lista');
+
+    if (lista.length === 0) {
+      el.innerHTML = `<div class="vazio"><i class="ti ti-clipboard-x" aria-hidden="true"></i>Nenhuma tarefa encontrada</div>`;
+      return;
+    }
+
+    el.innerHTML = lista.map(t => {
+      const atrasada = t.dataLimite && t.dataLimite < hoje && t.status !== 'CONCLUIDA';
+      const concluida = t.status === 'CONCLUIDA';
+      const labels = { PENDENTE: 'Pendente', EM_ANDAMENTO: 'Em andamento', CONCLUIDA: 'Concluída' };
+
+      return `
+        <div class="tarefa-card ${concluida ? 'concluida' : ''}">
+          <button class="check-btn ${concluida ? 'done' : ''}" onclick="alternarStatus(${JSON.stringify(t).replace(/"/g, '&quot;')})" title="Alternar status">
+            ${concluida ? '<i class="ti ti-check" aria-hidden="true"></i>' : ''}
+          </button>
+          <div class="tarefa-body">
+            <div class="tarefa-titulo ${concluida ? 'riscado' : ''}">${t.titulo}</div>
+            ${t.descricao ? `<div class="tarefa-desc">${t.descricao}</div>` : ''}
+            <div class="tarefa-meta">
+              <span class="badge ${t.status}">${labels[t.status]}</span>
+              ${t.dataLimite ? `<span class="data-badge ${atrasada ? 'atrasada' : ''}"><i class="ti ti-calendar" aria-hidden="true"></i>${formatarData(t.dataLimite)}${atrasada ? ' · atrasada' : ''}</span>` : ''}
+            </div>
+          </div>
+          <div class="tarefa-actions">
+            <button class="icon-btn" onclick='abrirEdicao(${JSON.stringify(t)})' title="Editar"><i class="ti ti-edit" aria-hidden="true"></i></button>
+            <button class="icon-btn danger" onclick="excluir(${t.id})" title="Excluir"><i class="ti ti-trash" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function formatarData(data) {
+    if (!data) return '';
+    const [a, m, d] = data.split('-');
+    return `${d}/${m}/${a}`;
+  }
+
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) fecharModal();
+  });
+
+  carregar();
+</script>
+</body>
+</html>
