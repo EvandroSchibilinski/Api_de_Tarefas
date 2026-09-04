@@ -1,135 +1,336 @@
-# 📋 Minhas Tarefas
+# Minhas Tarefas
 
-Aplicação full stack de gerenciamento de tarefas (To-Do List), com backend em **Spring Boot** e frontend em **React**.
+Aplicação full stack para gerenciamento de tarefas, com API REST em Spring Boot e interface em React.
 
-Permite criar, listar, filtrar, editar, atualizar status e excluir tarefas, com controle de data limite e destaque para tarefas atrasadas.
+O projeto permite criar, consultar, editar e excluir tarefas, controlar o fluxo de status, definir datas de início e limite, pesquisar por título e identificar tarefas atrasadas.
 
-## ✨ Funcionalidades
+## Funcionalidades
 
-- Criar tarefas com título, descrição e data limite
-- Listar todas as tarefas
-- Filtrar por status (Pendente, Em andamento, Concluída) ou por atrasadas
-- Buscar tarefas por título
-- Alternar status rapidamente (Pendente → Em andamento → Concluída)
-- Editar título, descrição, data limite e status
-- Excluir tarefas
-- Identificação visual de tarefas atrasadas
+- Criação e edição de tarefas com título, descrição, data de início e data limite
+- Estados `AGENDADA`, `PENDENTE`, `EM_ANDAMENTO` e `CONCLUIDA`
+- Transições de status protegidas por regras de domínio
+- Listagem paginada e ordenada
+- Filtros por status e tarefas atrasadas
+- Pesquisa por parte do título
+- Validação dos dados recebidos pela API
+- Respostas de erro padronizadas
+- Controle de concorrência por versão da entidade
 
-## 🛠️ Tecnologias
+## Tecnologias
 
-**Backend**
-- Java 25
-- Spring Boot 3.5
-- Spring Web
+### Backend
+
+- Java 21
+- Spring Boot 4.1.1
+- Spring Web MVC
 - Spring Data JPA
 - Bean Validation
 - PostgreSQL
+- MapStruct 1.6.3
+- Lombok
 - Maven
+- JUnit
 
-**Frontend**
+### Frontend
+
 - React 18
-- Vite
+- Vite 5
+- JavaScript
+- CSS
 
-## 📁 Estrutura do projeto
+## Arquitetura
 
+```text
+frontend
+   ↓ HTTP/JSON
+controller
+   ↓ DTOs de entrada
+service
+   ↓ regras de domínio
+entity
+   ↓ persistência
+repository
+   ↓
+PostgreSQL
 ```
+
+Responsabilidades principais:
+
+- `controller`: recebe requisições HTTP, valida dados e define códigos de resposta
+- `dto/request`: representa os dados aceitos em cada operação
+- `dto/response`: representa os contratos devolvidos ao cliente
+- `mapper`: converte entidades em respostas e requisições de criação em entidades
+- `service`: coordena casos de uso e transações
+- `entity`: protege as regras e transições de estado da tarefa
+- `repository`: executa consultas e operações de persistência
+- `exception`: padroniza erros de validação, domínio e recursos inexistentes
+
+## Estrutura
+
+```text
 .
-├── projeto/          # Backend Spring Boot (API REST)
-│   └── src/main/java/com/schibilinski/projeto/
-│       ├── controller/    # Endpoints REST
-│       ├── service/       # Regras de negócio
-│       ├── repository/    # Acesso a dados (JPA)
-│       ├── entity/        # Entidades (Tarefa)
-│       ├── dto/           # Objetos de transferência
-│       ├── exception/     # Tratamento global de exceções
-│       └── config/        # Configuração de CORS
-│
-└── frontend/         # Frontend React (Vite)
+├── projeto/
+│   └── src/
+│       ├── main/java/com/schibilinski/projeto/
+│       │   ├── config/
+│       │   ├── controller/
+│       │   ├── dto/
+│       │   │   ├── request/
+│       │   │   └── response/
+│       │   ├── entity/
+│       │   ├── exception/
+│       │   ├── mapper/
+│       │   ├── repository/
+│       │   └── service/
+│       └── test/java/
+└── frontend/
     └── src/
-        ├── components/    # Componentes de UI
-        ├── services/      # Integração com a API
-        └── App.jsx
+        ├── components/
+        ├── services/
+        ├── App.jsx
+        └── styles.css
 ```
 
-## 🚀 Como rodar o projeto
+## Pré-requisitos
 
-### Pré-requisitos
+- JDK 21
+- Maven 3.9 ou Maven Wrapper
+- Node.js 18 ou superior
+- PostgreSQL
 
-- [Java 25 (JDK)](https://adoptium.net/)
-- [Node.js](https://nodejs.org/) (versão 18 ou superior)
-- [PostgreSQL](https://www.postgresql.org/download/) rodando localmente
+## Configuração do banco
 
-### 1. Configurar o banco de dados
+Crie um banco PostgreSQL chamado `projeto`:
 
-Crie um banco chamado `projeto` no PostgreSQL. As credenciais padrão usadas em `projeto/src/main/resources/application.yaml`:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/projeto
-    username: postgres
-    password: Admin
+```sql
+CREATE DATABASE projeto;
 ```
 
-> Ajuste usuário/senha conforme sua instalação local. O Hibernate cria as tabelas automaticamente (`ddl-auto: update`).
+Confira as credenciais em:
 
-### 2. Rodar o backend
+```text
+projeto/src/main/resources/application.yaml
+```
 
-```bash
+Para uso fora do ambiente local, não mantenha credenciais reais no repositório. Use variáveis de ambiente ou perfis do Spring.
+
+## Executando o backend
+
+No diretório raiz do repositório:
+
+```powershell
 cd projeto
-./mvnw spring-boot:run        # Linux/Mac
-mvnw.cmd spring-boot:run      # Windows
+.\mvnw.cmd spring-boot:run
 ```
 
-A API sobe em `http://localhost:8080`.
+Se o Maven Wrapper não funcionar e o Maven estiver instalado:
 
-### 3. Rodar o frontend
+```powershell
+mvn spring-boot:run
+```
+
+A API ficará disponível em:
+
+```text
+http://localhost:8080
+```
+
+O backend também contém uma versão estática da interface em:
+
+```text
+http://localhost:8080/
+```
+
+## Executando o frontend React
 
 Em outro terminal:
 
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-A aplicação sobe em `http://localhost:5173`.
+A interface ficará disponível em:
 
-> Em desenvolvimento, o Vite faz proxy das chamadas `/tarefas` para `http://localhost:8080` (configurado em `vite.config.js`), então o frontend funciona sem configuração adicional. Também há uma configuração de CORS no backend liberando `localhost:5173`, para o caso de consumir a API diretamente.
+```text
+http://localhost:5173
+```
 
-## 📡 Endpoints da API
+O Vite encaminha as chamadas iniciadas por `/tarefas` para o backend em `http://localhost:8080`.
 
-| Método | Endpoint                     | Descrição                              |
-|--------|-------------------------------|-----------------------------------------|
-| GET    | `/tarefas`                    | Lista todas as tarefas                  |
-| GET    | `/tarefas/{id}`                | Busca uma tarefa por ID                 |
-| GET    | `/tarefas/status/{status}`     | Lista tarefas por status                |
-| GET    | `/tarefas/atrasadas`           | Lista tarefas atrasadas                 |
-| GET    | `/tarefas/buscar?titulo=`      | Busca tarefas por título                |
-| POST   | `/tarefas`                    | Cria uma nova tarefa                    |
-| PUT    | `/tarefas/{id}`                | Atualiza uma tarefa                     |
-| PATCH  | `/tarefas/{id}/status?status=` | Atualiza apenas o status                |
-| DELETE | `/tarefas/{id}`                | Exclui uma tarefa                       |
+## Acesso pelo celular
 
-Status possíveis: `PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`.
+O celular e o computador devem estar na mesma rede Wi-Fi. Descubra o IPv4 do computador:
 
-## 📦 Build de produção
+```powershell
+ipconfig
+```
 
-**Backend:**
-```bash
+Para acessar a interface servida pelo backend, use no celular:
+
+```text
+http://IP_DO_COMPUTADOR:8080
+```
+
+Exemplo:
+
+```text
+http://192.168.18.53:8080
+```
+
+Use explicitamente `http://`. O servidor local não está configurado com certificado HTTPS.
+
+Para disponibilizar o Vite na rede local:
+
+```powershell
+npm run dev -- --host 0.0.0.0
+```
+
+Depois acesse:
+
+```text
+http://IP_DO_COMPUTADOR:5173
+```
+
+## Estados e transições
+
+```text
+AGENDADA → PENDENTE → EM_ANDAMENTO → CONCLUIDA
+```
+
+- Uma tarefa com data de início futura é criada como `AGENDADA`
+- Uma tarefa sem início futuro é criada como `PENDENTE`
+- Somente uma tarefa pendente pode ser iniciada
+- Somente uma tarefa em andamento pode ser concluída
+- Uma tarefa concluída não pode ser editada
+- Uma tarefa é atrasada quando a data limite passou e ela ainda não foi concluída
+
+## Endpoints
+
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/tarefas` | Cria uma tarefa |
+| `GET` | `/tarefas` | Lista tarefas com paginação |
+| `GET` | `/tarefas/{id}` | Busca uma tarefa por ID |
+| `GET` | `/tarefas/status/{status}` | Lista tarefas por status |
+| `GET` | `/tarefas/atrasadas` | Lista tarefas atrasadas |
+| `GET` | `/tarefas/buscar?titulo=texto` | Pesquisa por título |
+| `PUT` | `/tarefas/{id}` | Atualiza os dados da tarefa |
+| `PATCH` | `/tarefas/{id}/status` | Avança o status da tarefa |
+| `DELETE` | `/tarefas/{id}` | Exclui uma tarefa |
+
+Os endpoints de listagem aceitam os parâmetros `page`, `size` e `sort`:
+
+```text
+GET /tarefas?page=0&size=20&sort=criadaEm,desc
+```
+
+## Exemplos da API
+
+### Criar tarefa
+
+```http
+POST /tarefas
+Content-Type: application/json
+```
+
+```json
+{
+  "titulo": "Estudar Spring Boot",
+  "descricao": "Revisar entidades, DTOs e services",
+  "dataInicio": "2026-09-05",
+  "dataLimite": "2026-09-10"
+}
+```
+
+### Atualizar dados
+
+```http
+PUT /tarefas/1
+Content-Type: application/json
+```
+
+```json
+{
+  "titulo": "Estudar Spring Boot e JPA",
+  "descricao": "Revisar domínio e persistência",
+  "dataInicio": "2026-09-05",
+  "dataLimite": "2026-09-12"
+}
+```
+
+### Atualizar status
+
+```http
+PATCH /tarefas/1/status
+Content-Type: application/json
+```
+
+```json
+{
+  "status": "EM_ANDAMENTO"
+}
+```
+
+## Validação e erros
+
+A API utiliza os seguintes códigos principais:
+
+- `400 Bad Request`: dados ou parâmetros inválidos
+- `404 Not Found`: tarefa inexistente
+- `409 Conflict`: transição de status inválida
+- `500 Internal Server Error`: falha inesperada
+
+Exemplo de erro de validação:
+
+```json
+{
+  "timestamp": "2026-09-04T10:30:00",
+  "status": 400,
+  "erro": "Bad Request",
+  "mensagem": "Existem campos inválidos",
+  "caminho": "/tarefas",
+  "campos": {
+    "titulo": "O título é obrigatório"
+  }
+}
+```
+
+## Testes
+
+Execute os testes do backend:
+
+```powershell
 cd projeto
-./mvnw clean package
+.\mvnw.cmd test
+```
+
+Ou, com Maven instalado:
+
+```powershell
+mvn test
+```
+
+## Build de produção
+
+Backend:
+
+```powershell
+cd projeto
+mvn clean package
 java -jar target/*.jar
 ```
 
-**Frontend:**
-```bash
+Frontend:
+
+```powershell
 cd frontend
 npm run build
 ```
 
-Gera a pasta `dist/`. Para servir o React pelo próprio Spring Boot, copie o conteúdo de `frontend/dist` para `projeto/src/main/resources/static/`.
+O build do frontend será criado em `frontend/dist`.
 
-## 📄 Licença
+## Licença
 
-Este projeto está sob a licença MIT — sinta-se livre para usar e modificar.
+Distribuído sob a licença MIT.
