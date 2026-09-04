@@ -38,6 +38,8 @@ export default function App() {
 
   useEffect(() => {
     carregar();
+
+    return () => clearTimeout(toastTimer.current);
   }, []);
 
   async function handleCriar(payload, erroValidacao) {
@@ -58,9 +60,11 @@ export default function App() {
 
   async function handleAlternarStatus(tarefa) {
     const proximo =
-      tarefa.status === 'PENDENTE' ? 'EM_ANDAMENTO'
+      tarefa.status === 'AGENDADA' ? 'PENDENTE'
+      : tarefa.status === 'PENDENTE' ? 'EM_ANDAMENTO'
       : tarefa.status === 'EM_ANDAMENTO' ? 'CONCLUIDA'
-      : 'PENDENTE';
+      : null;
+    if (!proximo) return;
     try {
       await tarefasApi.atualizarStatus(tarefa.id, proximo);
       await carregar();
@@ -85,11 +89,9 @@ export default function App() {
       await tarefasApi.atualizar(id, {
         titulo: dados.titulo,
         descricao: dados.descricao,
+        dataInicio: dados.dataInicio,
         dataLimite: dados.dataLimite,
       });
-      if (dados.statusAlterado) {
-        await tarefasApi.atualizarStatus(id, dados.status);
-      }
       setTarefaEditando(null);
       mostrarToast('Tarefa atualizada');
       await carregar();
@@ -99,9 +101,8 @@ export default function App() {
   }
 
   const tarefasFiltradas = useMemo(() => {
-    const hoje = new Date().toISOString().split('T')[0];
     if (filtroAtual === 'ATRASADAS') {
-      return tarefas.filter((t) => t.dataLimite && t.dataLimite < hoje && t.status !== 'CONCLUIDA');
+      return tarefas.filter((t) => t.atrasada);
     }
     if (filtroAtual !== 'TODAS') {
       return tarefas.filter((t) => t.status === filtroAtual);

@@ -3,6 +3,7 @@ import { useState } from 'react';
 export default function FormularioTarefa({ onCriar }) {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [dataInicio, setDataInicio] = useState('');
   const [dataLimite, setDataLimite] = useState('');
   const [enviando, setEnviando] = useState(false);
 
@@ -17,6 +18,7 @@ export default function FormularioTarefa({ onCriar }) {
     const sucesso = await onCriar({
       titulo: titulo.trim(),
       descricao: descricao.trim(),
+      dataInicio: dataInicio || null,
       dataLimite: dataLimite || null,
     });
     setEnviando(false);
@@ -24,6 +26,7 @@ export default function FormularioTarefa({ onCriar }) {
     if (sucesso) {
       setTitulo('');
       setDescricao('');
+      setDataInicio('');
       setDataLimite('');
     }
   }
@@ -45,6 +48,13 @@ export default function FormularioTarefa({ onCriar }) {
         />
         <input
           type="date"
+          aria-label="Data de início"
+          value={dataInicio}
+          onChange={(e) => setDataInicio(e.target.value)}
+        />
+        <input
+          type="date"
+          aria-label="Data limite"
           value={dataLimite}
           onChange={(e) => setDataLimite(e.target.value)}
         />

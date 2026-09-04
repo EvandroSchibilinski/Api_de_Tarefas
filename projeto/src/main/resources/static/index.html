@@ -378,7 +378,8 @@
   async function carregar() {
     try {
       const res = await fetch(API);
-      tarefas = await res.json();
+      const pagina = await res.json();
+      tarefas = pagina.conteudo || [];
       renderizar();
     } catch { toast('Erro ao conectar com a API', true); }
   }
@@ -408,10 +409,16 @@
   }
 
   async function alternarStatus(tarefa) {
-    const proximo = tarefa.status === 'PENDENTE' ? 'EM_ANDAMENTO'
+    const proximo = tarefa.status === 'AGENDADA' ? 'PENDENTE'
+                  : tarefa.status === 'PENDENTE' ? 'EM_ANDAMENTO'
                   : tarefa.status === 'EM_ANDAMENTO' ? 'CONCLUIDA'
-                  : 'PENDENTE';
-    await fetch(`${API}/${tarefa.id}/status?status=${proximo}`, { method: 'PATCH' });
+                  : null;
+    if (!proximo) return;
+    await fetch(`${API}/${tarefa.id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: proximo })
+    });
     carregar();
   }
 
@@ -446,11 +453,20 @@
     await fetch(`${API}/${editandoId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ titulo, descricao, dataLimite: dataLimite || null })
+      body: JSON.stringify({
+        titulo,
+        descricao,
+        dataInicio: tarefas.find(t => t.id === editandoId)?.dataInicio || null,
+        dataLimite: dataLimite || null
+      })
     });
 
     if (status !== tarefas.find(t => t.id === editandoId)?.status) {
-      await fetch(`${API}/${editandoId}/status?status=${status}`, { method: 'PATCH' });
+      await fetch(`${API}/${editandoId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
     }
 
     fecharModal();
@@ -470,7 +486,7 @@
     let lista = [...tarefas];
 
     if (filtroAtual === 'ATRASADAS') {
-      lista = lista.filter(t => t.dataLimite && t.dataLimite < hoje && t.status !== 'CONCLUIDA');
+      lista = lista.filter(t => t.atrasada);
     } else if (filtroAtual !== 'TODAS') {
       lista = lista.filter(t => t.status === filtroAtual);
     }
@@ -483,9 +499,9 @@
     }
 
     el.innerHTML = lista.map(t => {
-      const atrasada = t.dataLimite && t.dataLimite < hoje && t.status !== 'CONCLUIDA';
+      const atrasada = t.atrasada;
       const concluida = t.status === 'CONCLUIDA';
-      const labels = { PENDENTE: 'Pendente', EM_ANDAMENTO: 'Em andamento', CONCLUIDA: 'Concluída' };
+      const labels = { AGENDADA: 'Agendada', PENDENTE: 'Pendente', EM_ANDAMENTO: 'Em andamento', CONCLUIDA: 'Concluída' };
 
       return `
         <div class="tarefa-card ${concluida ? 'concluida' : ''}">

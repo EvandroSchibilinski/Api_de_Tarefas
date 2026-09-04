@@ -202,6 +202,7 @@ button i { font-size: 15px; }
 }
 
 .badge.PENDENTE { background: var(--warning-bg); color: var(--warning); }
+.badge.AGENDADA { background: var(--accent-bg); color: var(--accent); }
 .badge.EM_ANDAMENTO { background: var(--accent-bg); color: var(--accent); }
 .badge.CONCLUIDA { background: var(--success-bg); color: var(--success); }
 

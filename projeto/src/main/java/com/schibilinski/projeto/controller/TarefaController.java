@@ -1,9 +1,11 @@
 package com.schibilinski.projeto.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,10 +17,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.schibilinski.projeto.dto.TarefaDto;
-import com.schibilinski.projeto.entity.Tarefa.StatusTarefa;
+import com.schibilinski.projeto.dto.request.AlterarStatusRequest;
+import com.schibilinski.projeto.dto.request.AtualizarTarefaRequest;
+import com.schibilinski.projeto.dto.request.CriarTarefaRequest;
+import com.schibilinski.projeto.dto.response.PaginaResponse;
+import com.schibilinski.projeto.dto.response.TarefaResponse;
+import com.schibilinski.projeto.entity.StatusTarefa;
 import com.schibilinski.projeto.service.TarefaService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
+@Validated
 @RestController
 @RequestMapping("/tarefas")
 public class TarefaController {
@@ -30,66 +42,76 @@ public class TarefaController {
     }
 
     @PostMapping
-    public ResponseEntity<TarefaDto> criar(@RequestBody TarefaDto dto) {
-        TarefaDto criada = TarefaDto.fromEntity(tarefaService.criar(dto.toEntity()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(criada);
+    public ResponseEntity<TarefaResponse> criar(
+        @Valid @RequestBody CriarTarefaRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(tarefaService.criar(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<TarefaDto>> listarTodas() {
-        List<TarefaDto> lista = tarefaService.listarTodas()
-                .stream()
-                .map(TarefaDto::fromEntity)
-                .toList();
-        return ResponseEntity.ok(lista);
+    public ResponseEntity<PaginaResponse<TarefaResponse>> listarTodas(
+        @PageableDefault(size = 20, sort = "criadaEm", direction = Sort.Direction.DESC)
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(tarefaService.listarTodas(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TarefaDto> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(TarefaDto.fromEntity(tarefaService.buscarPorId(id)));
+    public ResponseEntity<TarefaResponse> buscarPorId(
+        @PathVariable @Positive(message = "O ID deve ser positivo") Long id
+    ) {
+        return ResponseEntity.ok(tarefaService.buscarPorId(id));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<TarefaDto>> listarPorStatus(@PathVariable StatusTarefa status) {
-        List<TarefaDto> lista = tarefaService.listarPorStatus(status)
-                .stream()
-                .map(TarefaDto::fromEntity)
-                .toList();
-        return ResponseEntity.ok(lista);
+    public ResponseEntity<PaginaResponse<TarefaResponse>> listarPorStatus(
+        @PathVariable StatusTarefa status,
+        @PageableDefault(size = 20, sort = "criadaEm", direction = Sort.Direction.DESC)
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(tarefaService.listarPorStatus(status, pageable));
     }
 
     @GetMapping("/atrasadas")
-    public ResponseEntity<List<TarefaDto>> listarAtrasadas() {
-        List<TarefaDto> lista = tarefaService.listarAtrasadas()
-                .stream()
-                .map(TarefaDto::fromEntity)
-                .toList();
-        return ResponseEntity.ok(lista);
+    public ResponseEntity<PaginaResponse<TarefaResponse>> listarAtrasadas(
+        @PageableDefault(size = 20, sort = "dataLimite", direction = Sort.Direction.ASC)
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(tarefaService.listarAtrasadas(pageable));
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<List<TarefaDto>> buscarPorTitulo(@RequestParam String titulo) {
-        List<TarefaDto> lista = tarefaService.buscarPorTitulo(titulo)
-                .stream()
-                .map(TarefaDto::fromEntity)
-                .toList();
-        return ResponseEntity.ok(lista);
+    public ResponseEntity<PaginaResponse<TarefaResponse>> buscarPorTitulo(
+        @RequestParam
+        @NotBlank(message = "O título da busca é obrigatório")
+        @Size(max = 150, message = "A busca deve possuir no máximo 150 caracteres")
+        String titulo,
+        @PageableDefault(size = 20, sort = "criadaEm", direction = Sort.Direction.DESC)
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(tarefaService.buscarPorTitulo(titulo, pageable));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TarefaDto> atualizar(@PathVariable Long id, @RequestBody TarefaDto dto) {
-        return ResponseEntity.ok(TarefaDto.fromEntity(tarefaService.atualizar(id, dto.toEntity())));
+    public ResponseEntity<TarefaResponse> atualizar(
+        @PathVariable @Positive(message = "O ID deve ser positivo") Long id,
+        @Valid @RequestBody AtualizarTarefaRequest request
+    ) {
+        return ResponseEntity.ok(tarefaService.atualizar(id, request));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<TarefaDto> atualizarStatus(
-            @PathVariable Long id,
-            @RequestParam StatusTarefa status) {
-        return ResponseEntity.ok(TarefaDto.fromEntity(tarefaService.atualizarStatus(id, status)));
+    public ResponseEntity<TarefaResponse> atualizarStatus(
+        @PathVariable @Positive(message = "O ID deve ser positivo") Long id,
+        @Valid @RequestBody AlterarStatusRequest request
+    ) {
+        return ResponseEntity.ok(tarefaService.atualizarStatus(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+    public ResponseEntity<Void> excluir(
+        @PathVariable @Positive(message = "O ID deve ser positivo") Long id
+    ) {
         tarefaService.excluir(id);
         return ResponseEntity.noContent().build();
     }

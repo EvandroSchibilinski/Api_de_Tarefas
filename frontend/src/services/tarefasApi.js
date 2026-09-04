@@ -20,9 +20,13 @@ async function tratarResposta(res) {
   return texto ? JSON.parse(texto) : null;
 }
 
+function extrairConteudo(pagina) {
+  return pagina?.conteudo || [];
+}
+
 export const tarefasApi = {
   listarTodas() {
-    return fetch(BASE_URL).then(tratarResposta);
+    return fetch(BASE_URL).then(tratarResposta).then(extrairConteudo);
   },
 
   buscarPorId(id) {
@@ -30,15 +34,17 @@ export const tarefasApi = {
   },
 
   listarPorStatus(status) {
-    return fetch(`${BASE_URL}/status/${status}`).then(tratarResposta);
+    return fetch(`${BASE_URL}/status/${status}`).then(tratarResposta).then(extrairConteudo);
   },
 
   listarAtrasadas() {
-    return fetch(`${BASE_URL}/atrasadas`).then(tratarResposta);
+    return fetch(`${BASE_URL}/atrasadas`).then(tratarResposta).then(extrairConteudo);
   },
 
   buscarPorTitulo(titulo) {
-    return fetch(`${BASE_URL}/buscar?titulo=${encodeURIComponent(titulo)}`).then(tratarResposta);
+    return fetch(`${BASE_URL}/buscar?titulo=${encodeURIComponent(titulo)}`)
+      .then(tratarResposta)
+      .then(extrairConteudo);
   },
 
   criar(tarefa) {
@@ -58,8 +64,10 @@ export const tarefasApi = {
   },
 
   atualizarStatus(id, status) {
-    return fetch(`${BASE_URL}/${id}/status?status=${status}`, {
+    return fetch(`${BASE_URL}/${id}/status`, {
       method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
     }).then(tratarResposta);
   },
 

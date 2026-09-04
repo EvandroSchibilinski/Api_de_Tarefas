@@ -1,18 +1,35 @@
 package com.schibilinski.projeto.repository;
 
 import java.time.LocalDate;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.schibilinski.projeto.entity.StatusTarefa;
 import com.schibilinski.projeto.entity.Tarefa;
-import com.schibilinski.projeto.entity.Tarefa.StatusTarefa;
 
 public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
-    List<Tarefa> findByTituloContainingIgnoreCase(String titulo);
+    Page<Tarefa> findByStatus(
+        StatusTarefa status,
+        Pageable pageable
+    );
 
-    List<Tarefa> findByDataLimiteBefore(LocalDate data);
+    Page<Tarefa> findByTituloContainingIgnoreCase(
+        String titulo,
+        Pageable pageable
+    );
 
-    List<Tarefa> findByStatus(StatusTarefa status);
+    Page<Tarefa> findByDataLimiteBeforeAndStatusNot(
+        LocalDate data,
+        StatusTarefa status,
+        Pageable pageable
+    );
+
+    Page<Tarefa> findByDataInicioLessThanEqualAndStatus(
+        LocalDate dataInicio,
+        StatusTarefa status,
+        Pageable pageable
+    );
 }

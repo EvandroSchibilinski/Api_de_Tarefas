@@ -1,5 +1,6 @@
 const OPCOES = [
   { valor: 'TODAS', label: 'Todas' },
+  { valor: 'AGENDADA', label: 'Agendada' },
   { valor: 'PENDENTE', label: 'Pendente' },
   { valor: 'EM_ANDAMENTO', label: 'Em andamento' },
   { valor: 'CONCLUIDA', label: 'Concluída' },

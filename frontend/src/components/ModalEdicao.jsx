@@ -3,16 +3,16 @@ import { useEffect, useState } from 'react';
 export default function ModalEdicao({ tarefa, onSalvar, onFechar }) {
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [dataInicio, setDataInicio] = useState('');
   const [dataLimite, setDataLimite] = useState('');
-  const [status, setStatus] = useState('PENDENTE');
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
     if (tarefa) {
       setTitulo(tarefa.titulo || '');
       setDescricao(tarefa.descricao || '');
+      setDataInicio(tarefa.dataInicio || '');
       setDataLimite(tarefa.dataLimite || '');
-      setStatus(tarefa.status);
     }
   }, [tarefa]);
 
@@ -24,9 +24,8 @@ export default function ModalEdicao({ tarefa, onSalvar, onFechar }) {
     await onSalvar(tarefa.id, {
       titulo: titulo.trim(),
       descricao: descricao.trim(),
+      dataInicio: dataInicio || null,
       dataLimite: dataLimite || null,
-      status,
-      statusAlterado: status !== tarefa.status,
     });
     setSalvando(false);
   }
@@ -50,16 +49,17 @@ export default function ModalEdicao({ tarefa, onSalvar, onFechar }) {
             <textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} />
           </div>
           <div>
-            <label>Data limite</label>
-            <input type="date" value={dataLimite} onChange={(e) => setDataLimite(e.target.value)} />
+            <label htmlFor="edicao-data-inicio">Data de início</label>
+            <input
+              id="edicao-data-inicio"
+              type="date"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+            />
           </div>
           <div>
-            <label>Status</label>
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="PENDENTE">Pendente</option>
-              <option value="EM_ANDAMENTO">Em andamento</option>
-              <option value="CONCLUIDA">Concluída</option>
-            </select>
+            <label>Data limite</label>
+            <input type="date" value={dataLimite} onChange={(e) => setDataLimite(e.target.value)} />
           </div>
         </div>
         <div className="form-actions">
