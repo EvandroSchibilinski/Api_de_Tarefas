@@ -119,3 +119,14 @@ http://IP_DO_COMPUTADOR:8080
 ```
 
 Use `http://`, pois o ambiente local não possui certificado HTTPS.
+
+
+## Próximos passos
+
+- Implementar autenticação com Spring Security e JWT
+- Vincular tarefas aos respectivos usuários
+- Ampliar os testes unitários e de integração
+- Documentar a API com Swagger/OpenAPI
+- Configurar variáveis de ambiente e migrações com Flyway
+- Preparar o projeto com Docker
+- Publicar frontend, backend e banco de dados
