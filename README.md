@@ -1,135 +1,121 @@
-# 📋 Minhas Tarefas
+# Minhas Tarefas
 
-Aplicação full stack de gerenciamento de tarefas (To-Do List), com backend em **Spring Boot** e frontend em **React**.
+Aplicação full stack para gerenciamento de tarefas, desenvolvida com **Spring Boot**, **React** e **PostgreSQL**.
 
-Permite criar, listar, filtrar, editar, atualizar status e excluir tarefas, com controle de data limite e destaque para tarefas atrasadas.
+## Funcionalidades
 
-## ✨ Funcionalidades
+- Criar, editar e excluir tarefas
+- Definir data de início e data limite
+- Pesquisar e filtrar tarefas
+- Identificar tarefas atrasadas
+- Controlar o status das tarefas
 
-- Criar tarefas com título, descrição e data limite
-- Listar todas as tarefas
-- Filtrar por status (Pendente, Em andamento, Concluída) ou por atrasadas
-- Buscar tarefas por título
-- Alternar status rapidamente (Pendente → Em andamento → Concluída)
-- Editar título, descrição, data limite e status
-- Excluir tarefas
-- Identificação visual de tarefas atrasadas
+Fluxo dos status:
 
-## 🛠️ Tecnologias
+```text
+AGENDADA → PENDENTE → EM ANDAMENTO → CONCLUÍDA
+```
 
-**Backend**
-- Java 25
-- Spring Boot 3.5
-- Spring Web
+## Tecnologias
+
+### Backend
+
+- Java 21
+- Spring Boot 4.1.1
 - Spring Data JPA
-- Bean Validation
 - PostgreSQL
-- Maven
+- Bean Validation
+- MapStruct
+- Lombok
+- JUnit
 
-**Frontend**
+### Frontend
+
 - React 18
-- Vite
+- Vite 5
+- JavaScript
+- CSS
 
-## 📁 Estrutura do projeto
+## Como executar
 
-```
-.
-├── projeto/          # Backend Spring Boot (API REST)
-│   └── src/main/java/com/schibilinski/projeto/
-│       ├── controller/    # Endpoints REST
-│       ├── service/       # Regras de negócio
-│       ├── repository/    # Acesso a dados (JPA)
-│       ├── entity/        # Entidades (Tarefa)
-│       ├── dto/           # Objetos de transferência
-│       ├── exception/     # Tratamento global de exceções
-│       └── config/        # Configuração de CORS
-│
-└── frontend/         # Frontend React (Vite)
-    └── src/
-        ├── components/    # Componentes de UI
-        ├── services/      # Integração com a API
-        └── App.jsx
+### Banco de dados
+
+Crie um banco PostgreSQL chamado `projeto`:
+
+```sql
+CREATE DATABASE projeto;
 ```
 
-## 🚀 Como rodar o projeto
+Depois, confira as credenciais em:
 
-### Pré-requisitos
-
-- [Java 25 (JDK)](https://adoptium.net/)
-- [Node.js](https://nodejs.org/) (versão 18 ou superior)
-- [PostgreSQL](https://www.postgresql.org/download/) rodando localmente
-
-### 1. Configurar o banco de dados
-
-Crie um banco chamado `projeto` no PostgreSQL. As credenciais padrão usadas em `projeto/src/main/resources/application.yaml`:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/projeto
-    username: postgres
-    password: Admin
+```text
+projeto/src/main/resources/application.yaml
 ```
 
-> Ajuste usuário/senha conforme sua instalação local. O Hibernate cria as tabelas automaticamente (`ddl-auto: update`).
+### Backend
 
-### 2. Rodar o backend
-
-```bash
+```powershell
 cd projeto
-./mvnw spring-boot:run        # Linux/Mac
-mvnw.cmd spring-boot:run      # Windows
+mvn spring-boot:run
 ```
 
-A API sobe em `http://localhost:8080`.
+A aplicação estará disponível em:
 
-### 3. Rodar o frontend
+```text
+http://localhost:8080
+```
 
-Em outro terminal:
+### Frontend React
 
-```bash
+```powershell
 cd frontend
 npm install
 npm run dev
 ```
 
-A aplicação sobe em `http://localhost:5173`.
+Acesse:
 
-> Em desenvolvimento, o Vite faz proxy das chamadas `/tarefas` para `http://localhost:8080` (configurado em `vite.config.js`), então o frontend funciona sem configuração adicional. Também há uma configuração de CORS no backend liberando `localhost:5173`, para o caso de consumir a API diretamente.
+```text
+http://localhost:5173
+```
 
-## 📡 Endpoints da API
+## Principais endpoints
 
-| Método | Endpoint                     | Descrição                              |
-|--------|-------------------------------|-----------------------------------------|
-| GET    | `/tarefas`                    | Lista todas as tarefas                  |
-| GET    | `/tarefas/{id}`                | Busca uma tarefa por ID                 |
-| GET    | `/tarefas/status/{status}`     | Lista tarefas por status                |
-| GET    | `/tarefas/atrasadas`           | Lista tarefas atrasadas                 |
-| GET    | `/tarefas/buscar?titulo=`      | Busca tarefas por título                |
-| POST   | `/tarefas`                    | Cria uma nova tarefa                    |
-| PUT    | `/tarefas/{id}`                | Atualiza uma tarefa                     |
-| PATCH  | `/tarefas/{id}/status?status=` | Atualiza apenas o status                |
-| DELETE | `/tarefas/{id}`                | Exclui uma tarefa                       |
+| Método | Endpoint | Descrição |
+|---|---|---|
+| `POST` | `/tarefas` | Criar tarefa |
+| `GET` | `/tarefas` | Listar tarefas |
+| `GET` | `/tarefas/{id}` | Buscar por ID |
+| `GET` | `/tarefas/atrasadas` | Listar atrasadas |
+| `GET` | `/tarefas/buscar?titulo=` | Buscar por título |
+| `PUT` | `/tarefas/{id}` | Editar tarefa |
+| `PATCH` | `/tarefas/{id}/status` | Atualizar status |
+| `DELETE` | `/tarefas/{id}` | Excluir tarefa |
 
-Status possíveis: `PENDENTE`, `EM_ANDAMENTO`, `CONCLUIDA`.
+## Exemplo de criação
 
-## 📦 Build de produção
+```json
+{
+  "titulo": "Estudar Spring Boot",
+  "descricao": "Revisar entidades e DTOs",
+  "dataInicio": "2026-09-05",
+  "dataLimite": "2026-09-10"
+}
+```
 
-**Backend:**
-```bash
+## Testes
+
+```powershell
 cd projeto
-./mvnw clean package
-java -jar target/*.jar
+mvn test
 ```
 
-**Frontend:**
-```bash
-cd frontend
-npm run build
+## Acesso pelo celular
+
+Com o celular e o computador na mesma rede Wi-Fi, acesse:
+
+```text
+http://IP_DO_COMPUTADOR:8080
 ```
 
-Gera a pasta `dist/`. Para servir o React pelo próprio Spring Boot, copie o conteúdo de `frontend/dist` para `projeto/src/main/resources/static/`.
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT — sinta-se livre para usar e modificar.
+Use `http://`, pois o ambiente local não possui certificado HTTPS.
