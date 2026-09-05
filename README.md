@@ -17,18 +17,17 @@ O projeto permite criar, consultar, editar e excluir tarefas, controlar o fluxo 
 - Controle de concorrência por versão da entidade
 
 ## Tecnologias
-
 ### Backend
 
 - Java 21
 - Spring Boot 4.1.1
 - Spring Web MVC
 - Spring Data JPA
-- Bean Validation
 - PostgreSQL
 - MapStruct 1.6.3
 - Lombok
 - Maven
+- Bean Validation
 - JUnit
 
 ### Frontend
@@ -143,7 +142,7 @@ http://localhost:8080/
 
 ## Executando o frontend React
 
-Em outro terminal:
+### Frontend React
 
 ```powershell
 cd frontend
@@ -334,3 +333,12 @@ O build do frontend será criado em `frontend/dist`.
 ## Licença
 
 Distribuído sob a licença MIT.
+## Próximos passos
+
+- Implementar autenticação com Spring Security e JWT
+- Vincular tarefas aos respectivos usuários
+- Ampliar os testes unitários e de integração
+- Documentar a API com Swagger/OpenAPI
+- Configurar variáveis de ambiente e migrações com Flyway
+- Preparar o projeto com Docker
+- Publicar frontend, backend e banco de dados
